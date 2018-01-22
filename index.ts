@@ -1,5 +1,4 @@
 import { connect as reduxConnect } from 'react-redux'
-import { createStore as reduxCreateStore } from 'redux'
 import { Component } from 'react'
 
 interface IFluxStandardAction {
@@ -56,23 +55,20 @@ export function connect<
   return reduxConnect(mapStateToProps, mapDispatchToProps)(ComponentClass)
 }
 
-export function createStore() {
-  return reduxCreateStore((rootState: { [key: string]: object }={}, action: IFluxStandardAction) => {
-    console.log(action)
-    if (action.type.indexOf(':') === - 1) {
-      return rootState
+export function fractionReducer(rootState: { [key: string]: object }={}, action: IFluxStandardAction) {
+  if (action.type.indexOf(':') === - 1) {
+    return rootState
+  }
+
+  const [ namespace, name ] = action.type.split(':')
+
+  const state = namespace in rootState ? rootState[namespace] : initialRootState[namespace]
+
+  return {
+    ...rootState,
+    [namespace]: {
+      ...state,
+      ...reducers[action.type](state, action.payload, action.error)
     }
-
-    const [ namespace, name ] = action.type.split(':')
-
-    const state = namespace in rootState ? rootState[namespace] : initialRootState[namespace]
-
-    return {
-      ...rootState,
-      [namespace]: {
-        ...state,
-        ...reducers[action.type](state, action.payload, action.error)
-      }
-    }
-  })
+  }
 }
