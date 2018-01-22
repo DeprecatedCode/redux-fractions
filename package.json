@@ -2,7 +2,7 @@
   "name": "fractions",
   "version": "0.0.0",
   "description": "FastReduxACTIONS combines Flux Standard Action creators and reducers",
-  "main": "src/index.ts",
+  "main": "index.ts",
   "repository": "git@github.com:NateFerrero/fractions.git",
   "author": "Nate Ferrero <nateferrero@gmail.com>",
   "license": "MIT",
