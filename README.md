@@ -1,2 +1,66 @@
 # fractions
 FastReduxACTIONS combines Flux Standard Action creators and reducers
+
+## Usage with Redux Store
+
+Suggested to use as the root reducer:
+
+```typescript
+import React from 'react'
+import ReactDOM from 'react-dom'
+import App from './app' // Update to your main component
+import { Provider } from 'react-redux'
+import { createStore } from 'redux'
+import { fractionReducer } from 'fractions'
+
+const store = createStore(
+  fractionReducer
+)
+
+ReactDOM.render(
+  <Provider store={store}>
+    <App />
+  </Provider>,
+  document.getElementById('app')
+)
+```
+
+## Usage in a Component
+
+Use fractions in place of the standard redux `connect` method:
+
+```typescript
+import React, { Component } from 'react'
+import { connect, FractionReducers } from 'fractions'
+
+interface IState {
+  count: number
+}
+
+const initialState: IState = {
+  count: 0
+}
+
+interface IActions {
+  increment: () => void
+}
+
+const appActions: FractionReducers<IState, IActions> = {
+  increment: state => {
+    return { count: state.count + 1 }
+  }
+}
+
+export class App extends Component<IState & IActions> {
+  render() {
+    const { count, increment } = this.props
+    return <div>
+      <button onClick={() => increment()}>Current count: {count}</button>
+    </div>
+  }
+}
+
+export default connect<App, IState, IActions>(App, initialState, appActions)
+```
+
+That's all you need to create a working app with react, redux, and fractions!

@@ -8,20 +8,29 @@ interface IFluxStandardAction {
   meta?: object
 }
 
-export interface IActionReducers<TComponentState> {
-  [key: string]: ((state: TComponentState, payload?: any, error?: boolean) => TComponentState)
+/**
+ * @name FractionReducers
+ * @author Nate Ferrero
+ * @description Type for object containing reducers
+ */
+export type FractionReducers<TComponentState, TComponentActions> = {
+  [K in keyof TComponentActions]: ((state: TComponentState, payload?: any, error?: boolean) => TComponentState)
 }
 
-const reducers: IActionReducers<{}> = {}
+const reducers: FractionReducers<{}, { [key: string]: any }> = {}
 const initialRootState: { [key: string]: any } = {}
 
-// This is complicated - we are ensuring type information can be passed through to redux
-// Details: { new(props: any): TComponentClass } is a constructor type signature
+/**
+ * @name connect
+ * @author Nate Ferrero
+ * @description This is complicated - we are ensuring type information can be passed through to redux
+ *              { new(props: any): TComponentClass } is a constructor type signature
+ */
 export function connect<
   TComponentClass extends Component<TComponentState & TComponentActions>,
   TComponentState,
   TComponentActions
->(ComponentClass: { new(props: any): TComponentClass }, initialState: TComponentState, actions: IActionReducers<TComponentState>) {
+>(ComponentClass: { new(props: any): TComponentClass }, initialState: TComponentState, actions: FractionReducers<TComponentState, TComponentActions>) {
   initialRootState[ComponentClass.name] = initialState
 
   const mapStateToProps = (state: any): TComponentState =>
@@ -46,7 +55,7 @@ export function connect<
         dispatch(action)
       }
 
-      reducers[actionType] = actions[key]
+      reducers[actionType] = (actions as any)[key]
     })
 
     return actionCreators as TComponentActions
@@ -55,6 +64,13 @@ export function connect<
   return reduxConnect(mapStateToProps, mapDispatchToProps)(ComponentClass)
 }
 
+/**
+ * @name fractionReducer
+ * @author Nate Ferrero
+ * @description the root fractions reducer, to be used with redux's createStore()
+ * @param rootState Current redux root state
+ * @param action Action to process
+ */
 export function fractionReducer(rootState: { [key: string]: object }={}, action: IFluxStandardAction) {
   if (action.type.indexOf(':') === - 1) {
     return rootState
