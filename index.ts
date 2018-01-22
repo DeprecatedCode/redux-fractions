@@ -14,7 +14,7 @@ interface IFluxStandardAction {
  * @description Type for object containing reducers
  */
 export type FractionReducers<TComponentState, TComponentActions> = {
-  [K in keyof TComponentActions]: ((state: TComponentState, payload?: any, error?: boolean) => TComponentState)
+  [K in keyof TComponentActions]: ((state: TComponentState, payload?: any, error?: boolean) => Partial<TComponentState>)
 }
 
 const reducers: FractionReducers<{}, { [key: string]: any }> = {}
