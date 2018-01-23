@@ -27,9 +27,10 @@ const initialRootState: { [key: string]: any } = {}
  *              { new(props: any): TComponentClass } is a constructor type signature
  */
 export function connect<
-  TComponentClass extends Component<TComponentState & TComponentActions>,
+  TComponentClass extends Component<TComponentState & TComponentActions & TComponentProps>,
   TComponentState,
-  TComponentActions
+  TComponentActions,
+  TComponentProps={}
 >(ComponentClass: { new(props: any): TComponentClass }, initialState: TComponentState, actions: FractionReducers<TComponentState, TComponentActions>) {
   initialRootState[ComponentClass.name] = initialState
 
@@ -46,12 +47,15 @@ export function connect<
         const action: IFluxStandardAction = {
           type: actionType
         }
-        if (payload) {
+
+        if (typeof payload !== 'undefined') {
           action.payload = payload
         }
-        if (error) {
+
+        if (typeof error !== 'undefined') {
           action.error = error
         }
+
         dispatch(action)
       }
 
@@ -61,7 +65,7 @@ export function connect<
     return actionCreators as TComponentActions
   }
 
-  return reduxConnect(mapStateToProps, mapDispatchToProps)(ComponentClass)
+  return reduxConnect<TComponentState, TComponentActions, TComponentProps>(mapStateToProps, mapDispatchToProps)(ComponentClass)
 }
 
 /**
