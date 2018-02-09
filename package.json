@@ -1,6 +1,6 @@
 {
   "name": "fractions",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "FastReduxACTIONS combines Flux Standard Action creators and reducers",
   "main": "index.ts",
   "repository": "git@github.com:NateFerrero/fractions.git",
