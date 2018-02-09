@@ -75,4 +75,44 @@ export class App extends Component<IState & IActions> {
 export default connect<App, IState, IActions>(App, initialState, appActions)
 ```
 
+If your component has props, you just need to add a 4th type parameter to `connect`:
+
+```typescript
+import React, { Component } from 'react'
+import { connect, FractionReducers } from 'redux-fractions'
+
+interface IProps {
+  name: string
+}
+
+interface IState {
+  count: number
+}
+
+const initialState: IState = {
+  count: 0
+}
+
+interface IActions {
+  increment: () => void
+}
+
+const appActions: FractionReducers<IProps & IState, IActions> = {
+  increment: state => {
+    return { count: state.count + 1 }
+  }
+}
+
+export class App extends Component<IProps & IState & IActions> {
+  render() {
+    const { count, increment } = this.props
+    return <div>
+      <button onClick={() => increment()}>Current count: {count}</button>
+    </div>
+  }
+}
+
+export default connect<App, IState, IActions, IProps>(App, initialState, appActions)
+```
+
 That's all you need to create a working app with react, redux, and fractions!
