@@ -80,14 +80,17 @@ export const connect = <
  * @param rootState Current redux root state
  * @param action Action to process
  */
-export const fractionReducer = (rootState: { [key: string]: object } = {}, action: IFluxStandardAction) => {
+export const fractionReducer = (rootState: void | { [key: string]: any } = {}, action: IFluxStandardAction) => {
   if (action.type.indexOf(':') === - 1) {
     return rootState
   }
 
   const [ namespace ] = action.type.split(':')
 
-  const state = namespace in rootState ? rootState[namespace] : initialRootState[namespace]
+  const state = typeof rootState === 'object' &&
+    namespace in rootState ?
+      rootState[namespace] :
+      initialRootState[namespace]
 
   return {
     ...rootState,
