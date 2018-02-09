@@ -82,7 +82,7 @@ import React, { Component } from 'react'
 import { connect, FractionReducers } from 'redux-fractions'
 
 interface IProps {
-  name: string
+  itemName: string
 }
 
 interface IState {
@@ -105,9 +105,9 @@ const appActions: FractionReducers<IProps & IState, IActions> = {
 
 export class App extends Component<IProps & IState & IActions> {
   render() {
-    const { count, increment } = this.props
+    const { count, increment, itemName } = this.props
     return <div>
-      <button onClick={() => increment()}>Current count: {count}</button>
+      <button onClick={() => increment()}>Current number of {itemName}: {count}</button>
     </div>
   }
 }
