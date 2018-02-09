@@ -1,0 +1,57 @@
+{
+  "defaultSeverity": "error",
+  "extends": [
+    "tslint:all"
+  ],
+  "rules": {
+    "arrow-parens": {
+      "options": "ban-single-arg-parens"
+    },
+    "comment-format": {
+      "options": [
+        "check-space"
+      ]
+    },
+    "completed-docs": false,
+    "indent": {
+      "options": [
+        "spaces",
+        2
+      ]
+    },
+    "no-any": false,
+    "no-unsafe-any": false,
+    "one-line": {
+      "options": [
+        "check-open-brace",
+        "check-whitespace"
+      ]
+    },
+    "quotemark": {
+      "options": [
+        "single",
+        "avoid-template"
+      ]
+    },
+    "semicolon": {
+      "options": [
+        "never"
+      ]
+    },
+    "trailing-comma": {
+      "options": [
+        {
+          "multiline": "never",
+          "singleline": "never"
+        }
+      ]
+    },
+    "type-literal-delimiter": false,
+    "typedef": false,
+    "variable-name": {
+      "options": [
+        "allow-pascal-case"
+      ]
+    }
+  }
+}

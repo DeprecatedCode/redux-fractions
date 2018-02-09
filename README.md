@@ -1,5 +1,17 @@
-# fractions
+# redux-fractions
 FastReduxACTIONS combines Flux Standard Action creators and reducers
+
+## Installation
+
+`yarn add redux-fractions` or `npm install --save redux-fractions`
+
+## Contributing
+
+Run tslint with `yarn lint` before submitting a pull request. To continuously watch your code and lint on changes, use the `yarn lint-watch` command.
+
+## Use without Typescript
+
+Run `yarn build` to compile a JavaScript version of this package.
 
 ## Usage with Redux Store
 
@@ -11,7 +23,7 @@ import ReactDOM from 'react-dom'
 import App from './app' // Update to your main component
 import { Provider } from 'react-redux'
 import { createStore } from 'redux'
-import { fractionReducer } from 'fractions'
+import { fractionReducer } from 'redux-fractions'
 
 const store = createStore(
   fractionReducer
@@ -31,7 +43,7 @@ Use fractions in place of the standard redux `connect` method:
 
 ```typescript
 import React, { Component } from 'react'
-import { connect, FractionReducers } from 'fractions'
+import { connect, FractionReducers } from 'redux-fractions'
 
 interface IState {
   count: number

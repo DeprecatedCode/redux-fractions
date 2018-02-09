@@ -6,5 +6,20 @@
   "repository": "git@github.com:NateFerrero/fractions.git",
   "author": "Nate Ferrero <nateferrero@gmail.com>",
   "license": "MIT",
-  "private": false
+  "private": false,
+  "scripts": {
+    "build": "tsc",
+    "lint": "tslint -c tslint.json -p ./ ./*.ts",
+    "lint-watch": "nodemon -e ts -w ./ -x yarn lint"
+  },
+  "devDependencies": {
+    "tslint": "^5.9.1",
+    "typescript": "^2.6.2",
+    "@types/react": "^16",
+    "@types/react-redux": "^5"
+  },
+  "peerDependencies": {
+    "react": "^16",
+    "react-redux": "^5"
+  }
 }
