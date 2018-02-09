@@ -39,7 +39,7 @@ ReactDOM.render(
 
 ## Usage in a Component
 
-Use fractions in place of the standard redux `connect` method:
+Use redux-fractions' `connect` method in place of the standard redux `connect` method:
 
 ```typescript
 import React, { Component } from 'react'
@@ -115,4 +115,4 @@ export class App extends Component<IProps & IState & IActions> {
 export default connect<App, IState, IActions, IProps>(App, initialState, appActions)
 ```
 
-That's all you need to create a working app with react, redux, and fractions!
+That's all you need to create a working app with react, redux, and redux-fractions!
