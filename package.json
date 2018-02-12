@@ -11,7 +11,8 @@
   "files": [
     "dist/index.js",
     "dist/index.js.map",
-    "dist/index.d.ts"
+    "dist/index.d.ts",
+    "index.ts"
   ],
   "scripts": {
     "build": "tsc --declaration",
