@@ -1,7 +1,7 @@
 import { Component } from 'react'
 import { connect as reduxConnect } from 'react-redux'
 
-interface IFluxStandardAction {
+export interface IFluxStandardAction {
   error?: boolean
   meta?: object
   payload?: any
@@ -16,13 +16,14 @@ export type FractionReducers<TComponentState, TComponentActions> = {
   [K in keyof TComponentActions]: ((state: TComponentState, payload?: any, error?: boolean) => Partial<TComponentState>)
 }
 
-const reducers: FractionReducers<{}, { [key: string]: any }> = {}
-const initialRootState: { [key: string]: any } = {}
+const reducers: FractionReducers<{}, { [key: string]: object }> = {}
+const initialRootState: { [key: string]: object } = {}
 
 /**
  * @author Nate Ferrero
  * @description This is complicated - we are ensuring type information can be passed through to redux
- *              { new(props: any): TComponentClass } is a constructor type signature
+ *              new(props: TComponentState & TComponentActions & TComponentProps): TComponentClass
+ *              is a constructor type signature
  */
 export const connect = <
   TComponentClass extends Component<TComponentState & TComponentActions & TComponentProps>,
@@ -30,17 +31,19 @@ export const connect = <
   TComponentActions,
   TComponentProps = {}
 >(
-  ComponentClass: { new(props: any): TComponentClass },
+  ComponentClass: {
+    new(props: TComponentState & TComponentActions & TComponentProps): TComponentClass
+  },
   initialState: TComponentState,
   actions: FractionReducers<TComponentState, TComponentActions>
 ) => {
-  initialRootState[ComponentClass.name] = initialState
+  initialRootState[ComponentClass.name] = initialState as any
 
-  const mapStateToProps = (state: any): TComponentState =>
-    ComponentClass.name in state ? state[ComponentClass.name] : initialState
+  const mapStateToProps = (state: { [key: string]: object }): TComponentState =>
+    ComponentClass.name in state ? state[ComponentClass.name] as any : initialState
 
   const mapDispatchToProps = (dispatch: any) => {
-    const actionCreators: {[key: string]: any} = {}
+    const actionCreators: Partial<TComponentActions> = {}
 
     Object.keys(actions)
       .forEach(key => {
@@ -80,7 +83,10 @@ export const connect = <
  * @param rootState Current redux root state
  * @param action Action to process
  */
-export const fractionReducer = (rootState: void | { [key: string]: any } = {}, action: IFluxStandardAction) => {
+export const fractionReducer = (
+  rootState: { [key: string]: object } | undefined = {},
+  action: IFluxStandardAction
+) => {
   if (action.type.indexOf(':') === - 1) {
     return rootState
   }
