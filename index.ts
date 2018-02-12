@@ -1,4 +1,4 @@
-import { Component } from 'react'
+import { Component, ComponentClass, StatelessComponent } from 'react'
 import { connect as reduxConnect } from 'react-redux'
 
 export interface IFluxStandardAction {
@@ -31,23 +31,24 @@ export const connect = <
   TComponentActions,
   TComponentProps = {}
 >(
-  ComponentClass: {
+  name: string,
+  ComponentReference: {
     new(props: TComponentState & TComponentActions & TComponentProps): TComponentClass
   },
   initialState: TComponentState,
   actions: FractionReducers<TComponentState, TComponentActions>
 ) => {
-  initialRootState[ComponentClass.name] = initialState as any
+  initialRootState[name] = initialState as any
 
   const mapStateToProps = (state: { [key: string]: object }): TComponentState =>
-    ComponentClass.name in state ? state[ComponentClass.name] as any : initialState
+    name in state ? state[name] as any : initialState
 
   const mapDispatchToProps = (dispatch: any) => {
-    const actionCreators: Partial<TComponentActions> = {}
+    const actionCreators: any = {}
 
     Object.keys(actions)
       .forEach(key => {
-        const actionType = `${ComponentClass.name}:${key}`
+        const actionType = `${name}:${key}`
 
         actionCreators[key] = (payload: any, error: boolean = false) => {
           const action: IFluxStandardAction = {
@@ -74,7 +75,7 @@ export const connect = <
   return reduxConnect<TComponentState, TComponentActions, TComponentProps>(
     mapStateToProps,
     mapDispatchToProps
-  )(ComponentClass)
+  )(ComponentReference)
 }
 
 /**

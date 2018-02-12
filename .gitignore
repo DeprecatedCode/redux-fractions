@@ -1,6 +1,5 @@
 # Built JavaScript Files
-index.js
-index.js.map
+dist
 
 # Logs
 logs

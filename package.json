@@ -2,14 +2,19 @@
   "name": "redux-fractions",
   "version": "0.3.1",
   "description": "FastReduxACTIONS combines Flux Standard Action creators and reducers",
-  "main": "index.js",
-  "types": "index.d.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "repository": "git@github.com:NateFerrero/redux-fractions.git",
   "author": "Nate Ferrero <nateferrero@gmail.com>",
   "license": "MIT",
   "private": false,
+  "files": [
+    "dist/index.js",
+    "dist/index.js.map",
+    "dist/index.d.ts"
+  ],
   "scripts": {
-    "build": "tsc",
+    "build": "tsc --declaration",
     "lint": "tslint -c tslint.json -p ./ ./*.ts",
     "lint-watch": "nodemon -e ts -w ./ -x yarn lint"
   },
