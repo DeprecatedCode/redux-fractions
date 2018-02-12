@@ -17,7 +17,7 @@ export type FractionReducers<TComponentState, TComponentActions> = {
 }
 
 const reducers: FractionReducers<{}, { [key: string]: object }> = {}
-const initialRootState: { [key: string]: object } = {}
+const initialRootStates: { [key: string]: object } = {}
 
 /**
  * @author Nate Ferrero
@@ -38,7 +38,7 @@ export const connect = <
   initialState: TComponentState,
   actions: FractionReducers<TComponentState, TComponentActions>
 ) => {
-  initialRootState[name] = initialState as any
+  initialRootStates[name] = initialState as any
 
   const mapStateToProps = (state: { [key: string]: object }): TComponentState =>
     name in state ? state[name] as any : initialState
@@ -85,7 +85,7 @@ export const connect = <
  * @param action Action to process
  */
 export const fractionReducer = (
-  rootState: { [key: string]: object } | undefined = {},
+  rootState: { [key: string]: object } | void = {},
   action: IFluxStandardAction
 ) => {
   if (action.type.indexOf(':') === - 1) {
@@ -97,7 +97,7 @@ export const fractionReducer = (
   const state = typeof rootState === 'object' &&
     namespace in rootState ?
       rootState[namespace] :
-      initialRootState[namespace]
+      initialRootStates[namespace]
 
   return {
     ...rootState,
