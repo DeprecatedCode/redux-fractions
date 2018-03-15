@@ -32,7 +32,7 @@ export const connect = <
   TComponentProps = {}
 >(
   name: string,
-  ComponentReference: {
+  ComponentReference: (() => JSX.Element | null) | {
     new(props: TComponentState & TComponentActions & TComponentProps): TComponentClass
   },
   initialState: TComponentState,
@@ -107,3 +107,19 @@ export const fractionReducer = (
     }
   }
 }
+
+// interface IMyComponentState {
+//   foo: boolean
+// }
+
+// interface IMyComponentActions {
+//   setFoo(foo: boolean): void
+// }
+
+// const myComponentActions: FractionReducers<IMyComponentState, IMyComponentActions> = {
+//   setFoo: (state: IMyComponentState, foo: boolean) => ({ foo })
+// }
+
+// const MyComponent = () => null // tslint:disable-line:no-null-keyword
+
+// connect('MyComponent', MyComponent, { foo: false }, myComponentActions)
