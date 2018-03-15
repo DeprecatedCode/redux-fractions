@@ -1,6 +1,6 @@
 {
   "name": "redux-fractions",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "FastReduxACTIONS combines Flux Standard Action creators and reducers",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
