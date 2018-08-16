@@ -19,7 +19,7 @@ export type Reducer<TState, TActions> = {
  * @author Nate Ferrero
  * @description Stateless component render function
  */
-export type Renderer<TState, TActions, TProps> = (
+export type Renderer<TState, TActions, TProps = void> = (
   state: TState,
   actions: TActions,
   props: TProps
@@ -35,7 +35,7 @@ const initialRootStates: { [key: string]: object } = {}
 export const connect = <
   TState,
   TActions,
-  TProps
+  TProps = void
   >(
     renderer: Renderer<TState, TActions, TProps>,
     initialState: TState,
