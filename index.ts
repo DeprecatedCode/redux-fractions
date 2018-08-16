@@ -1,4 +1,3 @@
-import { Component, ComponentClass, StatelessComponent } from 'react'
 import { connect as reduxConnect } from 'react-redux'
 
 export interface IFluxStandardAction {
@@ -12,41 +11,47 @@ export interface IFluxStandardAction {
  * @author Nate Ferrero
  * @description Type for object containing reducers
  */
-export type FractionReducers<TComponentState, TComponentActions> = {
-  [K in keyof TComponentActions]: ((state: TComponentState, payload?: any, error?: boolean) => Partial<TComponentState>)
+export type Reducer<TState, TActions> = {
+  [K in keyof TActions]: ((state: TState, payload?: any, error?: boolean) => Partial<TState>)
 }
 
-const reducers: FractionReducers<{}, { [key: string]: object }> = {}
+/**
+ * @author Nate Ferrero
+ * @description Type for stateless rendered component
+ */
+export type Renderer<TState, TActions, TProps> = (
+  state: TState,
+  actions: TActions,
+  props: TProps
+) => JSX.Element | null
+
+const reducers: Reducer<{}, { [key: string]: object }> = {}
 const initialRootStates: { [key: string]: object } = {}
 
 /**
  * @author Nate Ferrero
  * @description This is complicated - we are ensuring type information can be passed through to redux
- *              new(props: TComponentState & TComponentActions & TComponentProps): TComponentClass
- *              is a constructor type signature
  */
 export const connect = <
-  TComponentClass extends Component<TComponentState & TComponentActions & TComponentProps>,
-  TComponentState,
-  TComponentActions,
-  TComponentProps = {}
->(
-  name: string,
-  ComponentReference: ((props: TComponentState & TComponentActions & TComponentProps) => JSX.Element | null) | {
-    new(props: TComponentState & TComponentActions & TComponentProps): TComponentClass
-  },
-  initialState: TComponentState,
-  actions: FractionReducers<TComponentState, TComponentActions>
-) => {
+  TState,
+  TActions,
+  TProps
+  >(
+    renderer: Renderer<TState, TActions, TProps>,
+    initialState: TState,
+    actionDefinitions: Reducer<TState, TActions>
+  ) => {
+  const name = 'a'
+
   initialRootStates[name] = initialState as any
 
-  const mapStateToProps = (state: { [key: string]: object }): TComponentState =>
-    name in state ? state[name] as any : initialState
+  const mapStateToProps = (state: { [key: string]: object }): { state: TState } =>
+    ({ state: name in state ? state[name] as any : initialState })
 
   const mapDispatchToProps = (dispatch: any) => {
     const actionCreators: any = {}
 
-    Object.keys(actions)
+    Object.keys(actionDefinitions)
       .forEach(key => {
         const actionType = `${name}:${key}`
 
@@ -66,16 +71,16 @@ export const connect = <
           dispatch(action)
         }
 
-        reducers[actionType] = (actions as any)[key]
+        reducers[actionType] = (actionDefinitions as any)[key]
       })
 
-    return actionCreators as TComponentActions
+    return { actions: actionCreators as TActions }
   }
 
-  return reduxConnect<TComponentState, TComponentActions, TComponentProps>(
-    mapStateToProps,
-    mapDispatchToProps
-  )(ComponentReference)
+  return reduxConnect<{ actions: TActions, props: TProps, state: TState }, { actions: TActions}, TProps>(
+    mapStateToProps as any,
+    mapDispatchToProps as any
+  )(({ actions, state, ...props }: any) => renderer(state, actions, props))
 }
 
 /**
@@ -92,12 +97,12 @@ export const fractionReducer = (
     return rootState
   }
 
-  const [ namespace ] = action.type.split(':')
+  const [namespace] = action.type.split(':')
 
   const state = typeof rootState === 'object' &&
     namespace in rootState ?
-      rootState[namespace] :
-      initialRootStates[namespace]
+    rootState[namespace] :
+    initialRootStates[namespace]
 
   return {
     ...rootState,
@@ -107,20 +112,3 @@ export const fractionReducer = (
     }
   }
 }
-
-// interface IMyComponentState {
-//   foo: boolean
-// }
-
-// interface IMyComponentActions {
-//   setFoo(foo: boolean): void
-// }
-
-// const myComponentActions: FractionReducers<IMyComponentState, IMyComponentActions> = {
-//   setFoo: (state: IMyComponentState, foo: boolean) => ({ foo })
-// }
-
-// const MyComponent = ({ foo, setFoo }: IMyComponentState & IMyComponentActions) => null
-// tslint:disable-line:no-null-keyword max-line-length
-
-// connect('MyComponent', MyComponent, { foo: false }, myComponentActions)
