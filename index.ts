@@ -17,7 +17,7 @@ export type Reducer<TState, TActions> = {
 
 /**
  * @author Nate Ferrero
- * @description Type for stateless rendered component
+ * @description Stateless component render function
  */
 export type Renderer<TState, TActions, TProps> = (
   state: TState,
@@ -30,7 +30,7 @@ const initialRootStates: { [key: string]: object } = {}
 
 /**
  * @author Nate Ferrero
- * @description This is complicated - we are ensuring type information can be passed through to redux
+ * @description Connect a renderer, initial state, and action definitions, and optionally specify a name
  */
 export const connect = <
   TState,
@@ -39,21 +39,21 @@ export const connect = <
   >(
     renderer: Renderer<TState, TActions, TProps>,
     initialState: TState,
-    actionDefinitions: Reducer<TState, TActions>
+    actionDefinitions: Reducer<TState, TActions>,
+    name?: string
   ) => {
-  const name = (renderer as any).name
-
-  initialRootStates[name] = initialState as any
+  const nameSpace = typeof name === 'string' ? name : (renderer as any).name
+  initialRootStates[nameSpace] = initialState as any
 
   const mapStateToProps = (state: { [key: string]: object }): { state: TState } =>
-    ({ state: name in state ? state[name] as any : initialState })
+    ({ state: nameSpace in state ? state[nameSpace] as any : initialState })
 
   const mapDispatchToProps = (dispatch: any) => {
     const actionCreators: any = {}
 
     Object.keys(actionDefinitions)
       .forEach(key => {
-        const actionType = `${name}:${key}`
+        const actionType = `${nameSpace}:${key}`
 
         actionCreators[key] = (payload: any, error: boolean = false) => {
           const action: IFluxStandardAction = {
