@@ -41,7 +41,7 @@ export const connect = <
     initialState: TState,
     actionDefinitions: Reducer<TState, TActions>
   ) => {
-  const name = 'a'
+  const name = (renderer as any).name
 
   initialRootStates[name] = initialState as any
 
