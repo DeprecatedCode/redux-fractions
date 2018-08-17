@@ -14,12 +14,12 @@ This package is written in TypeScript. Run tslint with `npm lint` before submitt
 Suggested to use as the root reducer:
 
 ```TypeScript
-import React from 'react'
+import * as React from 'react'
 import ReactDOM from 'react-dom'
 
 import { Provider } from 'react-redux'
 import { createStore } from 'redux'
-import { fractionReducer } from 'redux-fractions'
+import { fractionReducer } from '../index'
 
 import { App } from './app' // Update to your main component import
 
@@ -27,9 +27,9 @@ const store = createStore(fractionReducer)
 
 ReactDOM.render(
   <Provider store={store}>
-    <App />
+    <App itemName='wine' />
   </Provider>,
-  document.getElementById('app')
+  document.getElementById('exampleApp')
 )
 ```
 
@@ -39,78 +39,62 @@ Use redux-fractions' `connect` method in place of the standard redux `connect` m
 
 ```TypeScript
 import * as React from 'react'
-import { connect, Reducer, Renderer } from 'redux-fractions'
+import { connect, IComponent } from '../index'
 
-interface IState {
-  count: number
-}
+interface IApp extends IComponent {
+  actions: {
+    increment: void
+    setUnit: string
+  }
 
-const appState: IState = {
-  count: 0
-}
+  data: {
+    userName: string
+  }
 
-interface IActions {
-  increment: () => void
-}
+  props: {
+    itemName: string
+  }
 
-const appActions: Reducer<IState, IActions> = {
-  increment: state => {
-    return { count: state.count + 1 }
+  state: {
+    count: number
+    unit: string
   }
 }
 
-const appRenderer: Renderer<IState, IActions> = (state, actions) => (
-  <div>
-    <button
-      onClick={actions.increment}
-    >
-      Current count: {state.count}
-    </button>
-  </div>
-)
+export const App = connect<IApp>('app', {
+  state: {
+    count: 0,
+    unit: 'gallons'
+  },
 
-export const App = connect(appRenderer, appState, appActions)
-```
+  reducers: {
+    increment: state => ({ count: state.count + 1 }),
+    setUnit: (state, unit) => ({ count: 0, unit })
+  },
 
-If your component uses external props, such as `<App itemName="animals" />`, just add a 3rd type parameter to `Renderer<IState, IActions, IProps>`:
-
-```TypeScript
-import * as React from 'react'
-import { connect, Reducer, Renderer } from 'redux-fractions'
-
-interface IProps {
-  itemName: string
-}
-
-interface IState {
-  count: number
-}
-
-const appState: IState = {
-  count: 0
-}
-
-interface IActions {
-  increment: () => void
-}
-
-const appActions: Reducer<IState, IActions> = {
-  increment: state => {
-    return { count: state.count + 1 }
+  render({ actions, data, props, state }) {
+    return (
+      <div>
+        <p>Welcome, {data.userName}!</p>
+        <button
+          onClick={() => actions.increment()}
+        >
+          Current amount of {props.itemName}: {state.count} {state.unit}
+        </button>
+        <button
+          onClick={() => actions.setUnit('liters')}
+        >
+          Use Metric
+        </button>
+        <button
+          onClick={() => actions.setUnit('gallons')}
+        >
+          Use Imperial
+        </button>
+      </div>
+    )
   }
-}
-
-const appRenderer: Renderer<IState, IActions, IProps> = (state, actions, props) => (
-  <div>
-    <button
-      onClick={actions.increment}
-    >
-      Current number of {props.itemName}: {state.count}
-    </button>
-  </div>
-)
-
-export const App = connect(appRenderer, appState, appActions)
+})
 ```
 
 That's all you need to create a working app with react, redux, and redux-fractions!

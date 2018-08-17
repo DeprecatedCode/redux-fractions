@@ -1,86 +1,126 @@
 import { connect as reduxConnect } from 'react-redux'
 
-export interface IFluxStandardAction {
+export interface IFluxStandardAction<TPayload = void> {
   error?: boolean
   meta?: object
-  payload?: any
+  payload?: TPayload
   type: string
 }
 
-/**
- * @author Nate Ferrero
- * @description Type for object containing reducers
- */
-export type Reducer<TState, TActions> = {
-  [K in keyof TActions]: ((state: TState, payload?: any, error?: boolean) => Partial<TState>)
+interface IState { [key: string]: object }
+
+export interface IComponent {
+  actions: {
+    [key: string]: any
+  }
+  data: IData
+  props: object
+  state: object
+}
+
+export interface IComponentArgument<
+  TComponent extends IComponent
+  > {
+  actions: {
+    [K in keyof TComponent['actions']]:
+    TComponent['actions'][K] extends void ?
+    () => void : (payload: TComponent['actions'][K]) => void
+  }
+  data: {
+    [K in keyof TComponent['data']]: {
+      error: boolean
+      loading: boolean
+      ready: boolean
+      value?: TComponent['data'][K]['type']
+    }
+  }
+  props: TComponent['props']
+  state: TComponent['state']
 }
 
 /**
  * @author Nate Ferrero
- * @description Stateless component render function
+ * @description Fraction Component
  */
-export type Renderer<TState, TActions, TProps = void> = (
-  state: TState,
-  actions: TActions,
-  props: TProps
-) => JSX.Element | null
+export interface IComponentImplementation<
+  TComponent extends IComponent
+  > {
+  reducers: {
+    [K in keyof TComponent['actions']]: (
+      (
+        state: TComponent['state'],
+        payload: TComponent['actions'][K],
+        error?: boolean
+      ) => Partial<TComponent['state']>
+    )
+  }
+  state: TComponent['state']
 
-const reducers: Reducer<{}, { [key: string]: object }> = {}
-const initialRootStates: { [key: string]: object } = {}
+  render(component: IComponentArgument<TComponent>, dataSource?: TDataSource<TComponent['data']>): JSX.Element | null
+}
+
+const reducers: { [key: string]: (state: object, payload?: any, error?: boolean) => object } = {}
+const initialRootStates: IState = {}
 
 /**
  * @author Nate Ferrero
  * @description Connect a renderer, initial state, and action definitions, and optionally specify a name
  */
 export const connect = <
-  TState,
-  TActions,
-  TProps = void
+  TComponent extends IComponent
   >(
-    renderer: Renderer<TState, TActions, TProps>,
-    initialState: TState,
-    actionDefinitions: Reducer<TState, TActions>,
-    name?: string
+    name: string,
+    component: IComponentImplementation<TComponent>
   ) => {
-  const nameSpace = typeof name === 'string' ? name : (renderer as any).name
-  initialRootStates[nameSpace] = initialState as any
+  initialRootStates[name] = component.state
 
-  const mapStateToProps = (state: { [key: string]: object }): { state: TState } =>
-    ({ state: nameSpace in state ? state[nameSpace] as any : initialState })
+  const mapStateToProps = (state: IState): { state: TComponent['state'] } =>
+    ({ state: name in state ? state[name] as any : component.state })
 
   const mapDispatchToProps = (dispatch: any) => {
     const actionCreators: any = {}
 
-    Object.keys(actionDefinitions)
+    Object.keys(component.reducers)
       .forEach(key => {
-        const actionType = `${nameSpace}:${key}`
+        const actionType = `${name}:${key}`
 
         actionCreators[key] = (payload: any, error: boolean = false) => {
           const action: IFluxStandardAction = {
+            error,
+            payload,
             type: actionType
-          }
-
-          if (typeof payload !== 'undefined') {
-            action.payload = payload
-          }
-
-          if (error) {
-            action.error = error
           }
 
           dispatch(action)
         }
 
-        reducers[actionType] = (actionDefinitions as any)[key]
+        reducers[actionType] = (component.reducers as any)[key]
       })
 
-    return { actions: actionCreators as TActions }
+    return { actions: actionCreators as TComponent['actions'] }
   }
 
-  return reduxConnect<{ actions: TActions, props: TProps, state: TState }, { actions: TActions}, TProps>(
+  const data = {} as any
+
+  return reduxConnect<{
+    actions: TComponent['actions'],
+    props: TComponent['props'],
+    state: TComponent['state']
+  }, { actions: TComponent['actions'] }, TComponent['props'] & { dataSource: TDataSource<TComponent['data']> }>(
     mapStateToProps as any,
-    mapDispatchToProps as any
-  )(({ actions, state, ...props }: any) => renderer(state, actions, props))
+    mapDispatchToProps as any,
+    undefined,
+    { getDisplayName: () => `Fraction:${name}` }
+  )(
+    ({ actions, state, dataSource, ...props }: any) => {
+      dataSource.connect(data)
+
+      return component.render(
+        { actions, data, props, state },
+        dataSource
+      )
+    }
+  )
 }
 
 /**
@@ -90,7 +130,7 @@ export const connect = <
  * @param action Action to process
  */
 export const fractionReducer = (
-  rootState: { [key: string]: object } | void = {},
+  rootState: IState | void = {},
   action: IFluxStandardAction
 ) => {
   if (action.type.indexOf(':') === - 1) {
@@ -111,4 +151,45 @@ export const fractionReducer = (
       ...reducers[action.type](state, action.payload, action.error)
     }
   }
+}
+
+export interface IData {
+  [key: string]: { type: any }
+}
+
+export type TDataSource<TData> = {
+  [K in keyof TData]: () => void
+}
+
+export type TDataValues<TData extends IData> = {
+  [K in keyof TData]: TData[K]['type']
+}
+
+export const createDataSource = <TData extends IData>(
+  configuration: TDataValues<TData>
+): TDataSource<TData> => {
+  const dataReferences = new WeakSet<object>()
+  const source: TDataSource<TData> = {
+    connect: (data: { [key: string]: any }) => {
+      dataReferences.add(data)
+      Object.keys(configuration)
+        .forEach(key => {
+          if (!(key in data)) {
+            data[key] = {
+              error: false,
+              loading: false,
+              ready: false,
+              value: undefined
+            }
+          }
+        })
+    }
+  } as any
+
+  Object.keys(configuration)
+    .forEach(key => {
+      source[key] = () => void 0
+    })
+
+  return source
 }

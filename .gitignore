@@ -1,5 +1,6 @@
 # Built JavaScript Files
 dist
+.cache
 
 # Logs
 logs
