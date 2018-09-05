@@ -3,18 +3,18 @@ import { render } from 'react-dom'
 
 import { Provider } from 'react-redux'
 import { createStore } from 'redux'
-import { fractionReducer, fractionPersist } from '../src'
+import { fractionReducer, fractionPersist } from '../../src'
 
 import { App } from './app'
 
-const appContainer = document.getElementById('exampleApp')
+const appContainer = document.getElementById('mathApp')
 const appStore = createStore(fractionReducer)
 
-fractionPersist('example-app')
+fractionPersist('math-app')
 
 render(
   <Provider store={appStore}>
-    <App itemName='wine' uuid='app' />
+    <App uuid='app' />
   </Provider>,
   appContainer
 )

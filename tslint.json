@@ -21,6 +21,7 @@
     },
     "no-any": false,
     "no-unsafe-any": false,
+    "no-unused-variable": false,
     "one-line": {
       "options": [
         "check-open-brace",

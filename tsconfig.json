@@ -12,6 +12,6 @@
     "baseUrl": "./src"
   },
   "include": [
-    "./index.ts"
+    "./src/*.ts"
   ]
 }

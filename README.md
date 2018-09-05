@@ -9,92 +9,69 @@ FastReduxACTIONS combines Flux Standard Action creators and reducers
 
 This package is written in TypeScript. Run tslint with `npm lint` before submitting a pull request. To continuously watch your code and lint on changes, use the `npm run lint-watch` command. To build, run `npm run build`.
 
+## Running the Examples
+
+Use [Parcel](https://parceljs.org/), for example: `parcel -p 3000 examples/hello-world/index.html` or `parcel -p 3000 examples/math/index.html`
+
 ## Usage with Redux Store
 
 Suggested to use as the root reducer:
 
 ```TypeScript
 import * as React from 'react'
-import ReactDOM from 'react-dom'
+import { render } from 'react-dom'
 
 import { Provider } from 'react-redux'
 import { createStore } from 'redux'
-import { fractionReducer } from '../index'
+import { fractionReducer } from '../../src'
 
-import { App } from './app' // Update to your main component import
+import { App } from './app'
 
-const store = createStore(fractionReducer)
+const appContainer = document.getElementById('helloApp')
+const appStore = createStore(fractionReducer)
 
-ReactDOM.render(
-  <Provider store={store}>
-    <App itemName='wine' />
+render(
+  <Provider store={appStore}>
+    <HelloApp uuid='app' planet='Earth' />
   </Provider>,
-  document.getElementById('exampleApp')
+  appContainer
 )
 ```
 
 ## Usage in a Component
 
-Use redux-fractions' `connect` method in place of the standard redux `connect` method:
+Use redux-fractions' `component()` method to create a component:
 
 ```TypeScript
 import * as React from 'react'
-import { connect, IComponent } from '../index'
+import { component } from 'redux-fractions'
 
-interface IApp extends IComponent {
-  actions: {
-    increment: void
-    setUnit: string
-  }
+export const HelloApp = component('HelloApp')
+  .props<{
+    planet: string
+  }>()
 
-  data: {
-    userName: string
-  }
+  .state<{
+    name: string
+  }>({
+    name: 'human'
+  })
 
-  props: {
-    itemName: string
-  }
+  .actions<{
+    setName: string
+  }>({
+    setName: name => ({ name })
+  })
 
-  state: {
-    count: number
-    unit: string
-  }
-}
-
-export const App = connect<IApp>('app', {
-  state: {
-    count: 0,
-    unit: 'gallons'
-  },
-
-  reducers: {
-    increment: state => ({ count: state.count + 1 }),
-    setUnit: (state, unit) => ({ count: 0, unit })
-  },
-
-  render({ actions, data, props, state }) {
-    return (
-      <div>
-        <p>Welcome, {data.userName}!</p>
-        <button
-          onClick={() => actions.increment()}
-        >
-          Current amount of {props.itemName}: {state.count} {state.unit}
-        </button>
-        <button
-          onClick={() => actions.setUnit('liters')}
-        >
-          Use Metric
-        </button>
-        <button
-          onClick={() => actions.setUnit('gallons')}
-        >
-          Use Imperial
-        </button>
-      </div>
-    )
-  }
-})
+  .render((props, state, actions) => (
+    <div>
+      <label>Enter your name:</label>
+      <p>
+        <input type='text' onChange={event => actions.setName(event.target.value)} value={state.name} />
+      </p>
+      <p>Hello, {state.name} from planet {props.planet}!</p>
+    </div>
+  ))
 ```
 
 That's all you need to create a working app with react, redux, and redux-fractions!

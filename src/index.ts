@@ -1,40 +1,66 @@
 import { ReactNode } from 'react'
-import { connect, Component } from 'react-redux'
+import { Component, connect } from 'react-redux'
 import { IFluxStandardAction } from './flux'
 
 interface IReducers {
   [key: string]: (state: object, payload?: any, error?: boolean) => object
 }
 
-interface IState {
+interface IStateType {
   [key: string]: object
 }
 
 export const reducers: IReducers = {}
-export const initialRootStates: IState = {}
+export const initialRootStates: IStateType = {}
 
-const lastPersistedState: IState = {}
-let persistKey: string = undefined
-let persistState: IState
+const PERSIST_TIMEOUT = 200
+const lastPersistedState: IStateType = {}
+let persistKey: string | undefined
+let persistState: IStateType | undefined
+const persist = (newRootState: IStateType) => {
+  if (typeof persistKey === 'undefined') {
+    return
+  }
+
+  try {
+    Object.keys(newRootState)
+      .forEach(key => {
+        lastPersistedState[key] = newRootState[key]
+      })
+    localStorage.setItem(persistKey, JSON.stringify(lastPersistedState))
+  }
+
+  catch (e) {
+    window.console.error(e)
+    window.console.warn('fractionPersist: unable to persist state')
+  }
+}
 
 /**
  * @author Nate Ferrero
  * @description basic localStorage persistence for redux-fractions
  * @param key local storage key to use for storing root state
  */
-export const fractionPersist = (key: string) => {
-  persistKey = key
+export const fractionPersist = (storageKey: string) => {
+  persistKey = storageKey
 
   try {
-    const data = JSON.parse(localStorage.getItem(persistKey)) as { [key: string]: any }
+    const storage = localStorage.getItem(persistKey)
 
-    Object.keys(data).forEach(key => {
-      initialRootStates[key] = data[key]
-      lastPersistedState[key] = data[key]
-    })
+    if (typeof storage !== 'string') {
+      return
+    }
+
+    const data = JSON.parse(storage) as { [key: string]: any }
+
+    Object.keys(data)
+      .forEach(key => {
+        initialRootStates[key] = data[key]
+        lastPersistedState[key] = data[key]
+      })
   }
 
-  catch (e) { }
+  catch (e) { return }
 }
 
 /**
@@ -44,8 +70,8 @@ export const fractionPersist = (key: string) => {
  * @param action Action to process
  */
 export const fractionReducer = (
-  rootState: IState | void = {},
-  action: IFluxStandardAction
+  rootState: IStateType | void = {},
+  action: IFluxStandardAction<any>
 ) => {
   const hasColon = action.type.indexOf(':')
   if (hasColon === -1) {
@@ -56,9 +82,13 @@ export const fractionReducer = (
   const [namespace, uuid] = stateKey.split('.')
   const actionType = `${namespace}:${type}`
 
-  typeof action.payload === 'undefined' ?
-    console.debug(`✳️ <${namespace} uuid='${atob(uuid)}'>.${type}()`) :
-    console.debug(`✳️ <${namespace} uuid='${atob(uuid)}'>.${type}(`, action.payload, ')')
+  if (typeof action.payload === 'undefined') {
+    window.console.debug(`✳️ <${namespace} uuid='${atob(uuid)}'>.${type}()`)
+  }
+
+  else {
+    window.console.debug(`✳️ <${namespace} uuid='${atob(uuid)}'>.${type}(`, action.payload, ')')
+  }
 
   const state = typeof rootState === 'object' &&
     stateKey in rootState ?
@@ -79,29 +109,21 @@ export const fractionReducer = (
 
   if (typeof persistKey === 'string') {
     if (typeof persistState === 'undefined') {
-      setTimeout(() => {
-        persist(persistState)
-        persistState = undefined
-      }, 250)
+      setTimeout(
+        () => {
+          if (typeof persistState !== 'undefined') {
+            persist(persistState)
+            persistState = undefined
+          }
+        },
+        PERSIST_TIMEOUT
+      )
     }
 
     persistState = newRootState
   }
 
   return newRootState
-}
-
-const persist = (newRootState: IState) => {
-  try {
-    Object.keys(newRootState).forEach(key => {
-      lastPersistedState[key] = newRootState[key]
-    })
-    localStorage.setItem(persistKey, JSON.stringify(lastPersistedState))
-  }
-  catch (e) {
-    console.error(e)
-    console.warn('fractionPersist: unable to persist state')
-  }
 }
 
 interface IActions {
@@ -112,7 +134,7 @@ interface IProps {
   [K: string]: any
 }
 
-type TUUIDProp = { uuid: string | number }
+interface IUUIDProp { uuid: string | number }
 
 type TActionsImplementation<TState, TActions extends IActions> = {
   [K in keyof TActions]: TActions[K] extends void ?
@@ -127,39 +149,52 @@ type TActionsDispatch<TActions extends IActions> = {
 }
 
 interface IInitialComponent {
-  props: <TProps extends IProps>() => IComponentWithProps<TProps>
-  state: <TState>(initialState: TState) => IComponentWithState<TState>
-  render: (renderer: (children?: ReactNode) => JSX.Element | null) => Component<{}>
+  props<TProps extends IProps>(): IComponentWithProps<TProps>
+  render(renderer: (children?: ReactNode) => JSX.Element | null): Component<{}>
+  state<TState>(initialState: TState): IComponentWithState<TState>
 }
 
 interface IComponentWithState<TState> {
-  actions: <TActions extends IActions>(componentActions: TActionsImplementation<TState, TActions>) => IComponentWithStateActions<TState, TActions>
+  actions<TActions extends IActions>(
+    componentActions: TActionsImplementation<TState, TActions>
+  ): IComponentWithStateActions<TState, TActions>
 }
 
 interface IComponentWithStateActions<TState, TActions extends IActions> {
-  render: (renderer: (state: TState, actions: TActionsDispatch<TActions>, children?: ReactNode) => JSX.Element | null) => Component<TUUIDProp>
+  render(
+    renderer: (state: TState, actions: TActionsDispatch<TActions>, children?: ReactNode) => JSX.Element | null
+  ): Component<IUUIDProp>
 }
 
 interface IComponentWithProps<TProps> {
-  state: <TState>(initialState: TState) => IComponentWithPropsState<TProps, TState>
-  render: (renderer: (props: TProps, children?: ReactNode) => JSX.Element | null) => Component<TProps>
+  render(renderer: (props: TProps, children?: ReactNode) => JSX.Element | null): Component<TProps>
+  state<TState>(initialState: TState): IComponentWithPropsState<TProps, TState>
 }
 
 interface IComponentWithPropsState<TProps, TState> {
-  actions: <TActions>(componentActions: TActionsImplementation<TState, TActions>) => IComponentWithPropsStateActions<TProps, TState, TActions>
+  actions<TActions>(
+    componentActions: TActionsImplementation<TState, TActions>
+  ): IComponentWithPropsStateActions<TProps, TState, TActions>
 }
 
 interface IComponentWithPropsStateActions<TProps extends IProps, TState, TActions extends IActions> {
-  render: (renderer: (props: TProps & TUUIDProp, state: TState, actions: TActionsDispatch<TActions>, children?: ReactNode) => JSX.Element | null) => Component<TProps & TUUIDProp>
+  render(
+    renderer: (
+      props: TProps & IUUIDProp,
+      state: TState,
+      actions: TActionsDispatch<TActions>,
+      children?: ReactNode
+    ) => JSX.Element | null
+  ): Component<TProps & IUUIDProp>
 }
 
 const getMapStateToProps = <IState>(name: string) =>
-  (state: IState, ownProps: TUUIDProp) => {
+  (state: IState, ownProps: IUUIDProp) => {
     const stateKey = `${name}.${'uuid' in ownProps ? btoa(String(ownProps.uuid)) : 'all'}`
 
     return ({
       state: stateKey in state ?
-        state[stateKey] :
+        (state as any)[stateKey] :
         (
           stateKey in initialRootStates ?
             initialRootStates[stateKey] :
@@ -169,8 +204,10 @@ const getMapStateToProps = <IState>(name: string) =>
     })
   }
 
-const getMapDispatchToProps = <TState, TActions extends IActions>(name: string, componentActions: TActionsImplementation<TState, TActions>) => {
-  return (dispatch: any, ownProps: TUUIDProp) => {
+const getMapDispatchToProps = <
+  TState, TActions extends IActions
+  >(name: string, componentActions: TActionsImplementation<TState, TActions>) =>
+  (dispatch: any, ownProps: IUUIDProp) => {
     const actionCreators: any = {}
 
     Object.keys(componentActions)
@@ -191,6 +228,7 @@ const getMapDispatchToProps = <TState, TActions extends IActions>(name: string, 
         if (!(actionKey in reducers)) {
           reducers[actionKey] = (state, payload, error) => {
             const reducer = componentActions[key] as any
+
             return typeof payload === 'undefined' ?
               reducer(state, error) :
               reducer(payload, state, error)
@@ -200,7 +238,6 @@ const getMapDispatchToProps = <TState, TActions extends IActions>(name: string, 
 
     return { actions: actionCreators as TActionsDispatch<TActions> }
   }
-}
 
 /**
  * @author Nate Ferrero
@@ -220,7 +257,7 @@ export const component = (name: string): IInitialComponent => ({
                 return connect<
                   { state: TState },
                   { actions: TActionsDispatch<TActions> },
-                  TProps & TUUIDProp,
+                  TProps & IUUIDProp,
                   TState
                   >(
                     getMapStateToProps<TState>(name),
@@ -250,7 +287,7 @@ export const component = (name: string): IInitialComponent => ({
             return connect<
               { state: TState },
               { actions: TActionsDispatch<TActions> },
-              TUUIDProp,
+              IUUIDProp,
               TState
               >(
                 getMapStateToProps<TState>(name),
@@ -270,9 +307,10 @@ export const component = (name: string): IInitialComponent => ({
   }
 })
 
-const safeActionTimers = {}
+const SAFE_ACTION_TIMEOUT = 15
+const safeActionTimers: { [key: string]: number } = {}
 
 export const requestSafeAction = (uuid: string | number, action: () => void) => {
-  clearTimeout(safeActionTimers[uuid])
-  safeActionTimers[uuid] = setTimeout(action, 15)
+  clearTimeout(safeActionTimers[String(uuid)])
+  safeActionTimers[String(uuid)] = setTimeout(action, SAFE_ACTION_TIMEOUT)
 }

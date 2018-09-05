@@ -16,8 +16,8 @@
   ],
   "scripts": {
     "build": "tsc --declaration",
-    "lint": "tslint -c tslint.json -p ./ ./*.ts",
-    "lint-watch": "nodemon -e ts -w ./ -x yarn lint"
+    "lint": "tslint -c tslint.json -p ./ ./src/*.ts",
+    "lint-watch": "nodemon -e ts -w ./ -x npm run lint"
   },
   "devDependencies": {
     "@types/react": "^16",

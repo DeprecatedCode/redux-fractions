@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { component } from '../src'
+import { component } from '../../src'
 
 import { convertLiquidQuantity, TLiquidUnit } from './units/liquid'
 

@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { component, requestSafeAction } from '../../src'
+import { component, requestSafeAction } from '../../../src'
 import { TLiquidUnit, LiquidUnitAbbreviation } from '../units/liquid'
 
 const visualizationTimers = {}

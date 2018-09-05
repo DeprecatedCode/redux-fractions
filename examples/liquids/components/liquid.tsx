@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { component } from '../../src'
+import { component } from '../../../src'
 import { LiquidUnitPlural, TLiquidUnit } from '../units/liquid'
 
 interface IProps {
