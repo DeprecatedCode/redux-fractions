@@ -1,65 +1,65 @@
 import * as React from 'react'
-import { connect, IComponent } from '../index'
+import { component } from '../src'
 
-interface IApp extends IComponent {
-  actions: {
-    increment: void
-    setUnit: string
-  }
+import { convertLiquidQuantity, TLiquidUnit } from './units/liquid'
 
-  data: {
-    userName: {
-      type: string
-    }
-  }
+import { Liquid } from './components/liquid'
+import { LiquidVisualization } from './components/liquid-visualization'
 
-  props: {
+export const App = component('App')
+  .props<{
     itemName: string
-  }
+  }>()
 
-  state: {
+  .state<{
     count: number
-    unit: string
-  }
-}
-
-export const App = connect<IApp>('App', {
-  state: {
+    unit: TLiquidUnit
+  }>({
     count: 0,
-    unit: 'gallons'
-  },
+    unit: 'gallon'
+  })
 
-  reducers: {
+  .actions<{
+    decrement: void
+    increment: void
+    setUnit: TLiquidUnit
+  }>({
+    decrement: state => ({ count: Math.max(0, state.count - 1) }),
     increment: state => ({ count: state.count + 1 }),
-    setUnit: (state, unit) => ({ count: 0, unit })
-  },
+    setUnit: (unit, state) => ({
+      count: convertLiquidQuantity(state.count, state.unit, unit),
+      unit
+    })
+  })
 
-  render({ actions, data, props, state }, dataSource) {
-    dataSource.userName()
-
-    if (!data.userName.ready) {
-      return <div>Please wait...</div>
-    }
-
+  .render((props, state, actions) => {
     return (
       <div>
-        <p>Welcome, {data.userName.value}!</p>
+        <p>Welcome, guest: let's measure some {props.itemName}!</p>
+        <Liquid unit={state.unit} quantity={state.count} />
+        <LiquidVisualization uuid={`${props.uuid}.visualization1`} unit={state.unit} quantity={state.count} />
+        <button
+          onClick={() => actions.decrement()}
+        >
+          Remove 1 {state.unit}
+        </button>
         <button
           onClick={() => actions.increment()}
         >
-          Current amount of {props.itemName}: {state.count} {state.unit}
+          Add 1 {state.unit}
         </button>
         <button
-          onClick={() => actions.setUnit('liters')}
+          onClick={() => actions.setUnit('liter')}
         >
           Use Metric
         </button>
         <button
-          onClick={() => actions.setUnit('gallons')}
+          onClick={() => actions.setUnit('gallon')}
         >
           Use Imperial
         </button>
+        <p>If there was twice as much:</p>
+        <LiquidVisualization uuid={`${props.uuid}.visualization2`} unit={state.unit} quantity={2 * state.count} />
       </div>
     )
-  }
-})
+  })

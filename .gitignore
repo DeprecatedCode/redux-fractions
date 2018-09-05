@@ -2,6 +2,9 @@
 dist
 .cache
 
+# Mac OS X
+.DS_Store
+
 # Logs
 logs
 *.log

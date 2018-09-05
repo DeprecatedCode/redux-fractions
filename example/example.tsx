@@ -1,25 +1,20 @@
 import * as React from 'react'
-import ReactDOM from 'react-dom'
+import { render } from 'react-dom'
 
 import { Provider } from 'react-redux'
 import { createStore } from 'redux'
-import { createDataSource, fractionReducer, IData } from '../index'
+import { fractionReducer, fractionPersist } from '../src'
 
-import { App } from './app' // Update to your main component import
+import { App } from './app'
 
-const store = createStore(fractionReducer)
+const appContainer = document.getElementById('exampleApp')
+const appStore = createStore(fractionReducer)
 
-interface IAppData extends IData {
-  userName: {
-    type: string
-  }
-}
+fractionPersist('example-app')
 
-const appData = createDataSource<IAppData>({ userName: 'Abc' })
-
-ReactDOM.render(
-  <Provider store={store}>
-    <App itemName='wine' dataSource={appData} />
+render(
+  <Provider store={appStore}>
+    <App itemName='wine' uuid='app' />
   </Provider>,
-  document.getElementById('exampleApp')
+  appContainer
 )
