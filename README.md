@@ -7,7 +7,7 @@ FastReduxACTIONS combines Flux Standard Action creators and reducers
 
 ## Contributing
 
-This package is written in TypeScript. Run tslint with `npm lint` before submitting a pull request. To continuously watch your code and lint on changes, use the `npm run lint-watch` command. To build, run `npm run build`.
+This package is written in TypeScript. Run tslint with `npm run lint` before submitting a pull request. To continuously watch your code and lint on changes, use the `npm run lint-watch` command. To build, run `npm run build`.
 
 ## Running the Examples
 
