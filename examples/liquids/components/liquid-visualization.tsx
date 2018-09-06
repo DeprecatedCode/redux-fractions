@@ -2,8 +2,6 @@ import * as React from 'react'
 import { component, requestSafeAction } from '../../../src'
 import { TLiquidUnit, LiquidUnitAbbreviation } from '../units/liquid'
 
-const visualizationTimers = {}
-
 const bucketStyle = {
   verticalAlign: 'bottom',
   display: 'inline-block',
@@ -66,27 +64,35 @@ export const LiquidVisualization = component('LiquidVisualization')
   }>()
 
   .state<{
-    currentQuantity: number
-  }>({ currentQuantity: 0 })
+    _: {
+      currentQuantity: number
+    }
+  }>({
+    _: { currentQuantity: 0 }
+  })
 
   .actions<{
     setCurrentQuantity: number
   }>({
-    setCurrentQuantity: currentQuantity => ({ currentQuantity })
+    setCurrentQuantity: currentQuantity => ({
+      _: {
+        currentQuantity
+      }
+    })
   })
 
   .render((props, state, actions) => {
-    if (props.quantity !== state.currentQuantity) {
-      const diffQuantity = props.quantity - state.currentQuantity
+    if (props.quantity !== state._.currentQuantity) {
+      const diffQuantity = props.quantity - state._.currentQuantity
       const nextQuantity = Math.abs(diffQuantity) < 0.05 ?
         props.quantity :
-        state.currentQuantity + diffQuantity / 3
+        state._.currentQuantity + diffQuantity / 3
       requestSafeAction(props.uuid, () => actions.setCurrentQuantity(nextQuantity))
     }
 
     return (
       <div style={{ width: '400px', margin: '1em 0' }}>
-        {renderBuckets(state.currentQuantity, props.unit)}
+        {renderBuckets(state._.currentQuantity, props.unit)}
       </div>
     )
   })

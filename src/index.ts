@@ -7,7 +7,9 @@ interface IReducers {
 }
 
 interface IStateType {
-  [key: string]: object
+  [key: string]: {
+    [key: string]: object
+  }
 }
 
 export const reducers: IReducers = {}
@@ -25,7 +27,23 @@ const persist = (newRootState: IStateType) => {
   try {
     Object.keys(newRootState)
       .forEach(key => {
-        lastPersistedState[key] = newRootState[key]
+        const filteredState: { [key: string]: any } = {}
+        let include = false
+        Object.keys(newRootState[key])
+          .forEach(subKey => {
+            if (subKey !== '_') {
+              filteredState[subKey] = newRootState[key][subKey]
+              include = true
+            }
+          })
+
+        if (include) {
+          lastPersistedState[key] = filteredState
+        }
+
+        else if (key in lastPersistedState) {
+          delete lastPersistedState[key]
+        }
       })
     localStorage.setItem(persistKey, JSON.stringify(lastPersistedState))
   }
@@ -191,15 +209,17 @@ interface IComponentWithPropsStateActions<TProps extends IProps, TState, TAction
 const getMapStateToProps = <IState>(name: string) =>
   (state: IState, ownProps: IUUIDProp) => {
     const stateKey = `${name}.${'uuid' in ownProps ? btoa(String(ownProps.uuid)) : 'all'}`
-
     return ({
       state: stateKey in state ?
         (state as any)[stateKey] :
         (
           stateKey in initialRootStates ?
-            initialRootStates[stateKey] :
+            (
+              '_' in initialRootStates[name] ?
+                { ...initialRootStates[stateKey], _: initialRootStates[name]._ } :
+                initialRootStates[stateKey]
+            ) :
             initialRootStates[name]
-
         )
     })
   }
