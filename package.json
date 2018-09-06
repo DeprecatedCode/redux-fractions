@@ -16,6 +16,7 @@
     "src/index.ts"
   ],
   "scripts": {
+    "prepublish": "rm -rf ./dist && npm run build",
     "build": "tsc --declaration",
     "lint": "tslint -c tslint.json -p ./ ./src/*.ts",
     "lint-watch": "nodemon -e ts -w ./ -x npm run lint"
