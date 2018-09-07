@@ -32,13 +32,17 @@ const doMath = (x: number, y: number, operand: string) => {
 
 export const App = component('App')
   .state<{
+    _: {
+      operand: string
+    }
     x: number
     y: number
-    operand: string
   }>({
+    _: {
+      operand: '+'
+    },
     x: 0,
     y: 0,
-    operand: '+'
   })
   .actions<{
     setX: number
@@ -47,16 +51,16 @@ export const App = component('App')
   }>({
     setX: x => ({ x: isNaN(x) ? 0 : x }),
     setY: y => ({ y: isNaN(y) ? 0 : y }),
-    setOperand: operand => ({ operand })
+    setOperand: operand => ({ _: { operand } })
   })
-  .render((state, actions) => (
+  .render(({ x, y, _: { operand } }, actions) => (
     <div>
-      <input type='number' onChange={event => actions.setX(event.target.valueAsNumber)} value={state.x} />
-      <button style={buttonStyle(state.operand === '+')} disabled={state.operand === '+'} onClick={() => actions.setOperand('+')}>+</button>
-      <button style={buttonStyle(state.operand === '-')} disabled={state.operand === '-'} onClick={() => actions.setOperand('-')}>-</button>
-      <button style={buttonStyle(state.operand === '×')} disabled={state.operand === '×'} onClick={() => actions.setOperand('×')}>×</button>
-      <button style={buttonStyle(state.operand === '÷')} disabled={state.operand === '÷'} onClick={() => actions.setOperand('÷')}>÷</button>
-      <input type='number' onChange={event => actions.setY(event.target.valueAsNumber)} value={state.y} />
-      {' '} = {doMath(state.x, state.y, state.operand)}
+      <input type='number' onChange={event => actions.setX(event.target.valueAsNumber)} value={x} />
+      <button style={buttonStyle(operand === '+')} disabled={operand === '+'} onClick={() => actions.setOperand('+')}>+</button>
+      <button style={buttonStyle(operand === '-')} disabled={operand === '-'} onClick={() => actions.setOperand('-')}>-</button>
+      <button style={buttonStyle(operand === '×')} disabled={operand === '×'} onClick={() => actions.setOperand('×')}>×</button>
+      <button style={buttonStyle(operand === '÷')} disabled={operand === '÷'} onClick={() => actions.setOperand('÷')}>÷</button>
+      <input type='number' onChange={event => actions.setY(event.target.valueAsNumber)} value={y} />
+      {' '} = {doMath(x, y, operand)}
     </div>
   ))

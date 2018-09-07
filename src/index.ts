@@ -12,6 +12,7 @@ interface IStateType {
   }
 }
 
+const TEMPORARY_STATE_KEY = '_'
 export const reducers: IReducers = {}
 export const initialRootStates: IStateType = {}
 
@@ -31,7 +32,7 @@ const persist = (newRootState: IStateType) => {
         let include = false
         Object.keys(newRootState[key])
           .forEach(subKey => {
-            if (subKey !== '_') {
+            if (subKey !== TEMPORARY_STATE_KEY) {
               filteredState[subKey] = newRootState[key][subKey]
               include = true
             }
@@ -113,7 +114,7 @@ export const fractionReducer = (
     rootState[stateKey] :
     (
       stateKey in initialRootStates ?
-        initialRootStates[stateKey] :
+        { ...initialRootStates[namespace], ...initialRootStates[stateKey] } :
         initialRootStates[namespace]
     )
 
@@ -214,11 +215,7 @@ const getMapStateToProps = <IState>(name: string) =>
         (state as any)[stateKey] :
         (
           stateKey in initialRootStates ?
-            (
-              '_' in initialRootStates[name] ?
-                { ...initialRootStates[stateKey], _: initialRootStates[name]._ } :
-                initialRootStates[stateKey]
-            ) :
+            { ...initialRootStates[name], ...initialRootStates[stateKey] } :
             initialRootStates[name]
         )
     })
