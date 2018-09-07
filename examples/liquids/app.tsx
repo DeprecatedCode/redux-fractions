@@ -37,29 +37,23 @@ export const App = component('App')
       <div>
         <p>Welcome, guest: let's measure some {props.itemName}!</p>
         <Liquid unit={state.unit} quantity={state.count} />
-        <LiquidVisualization uuid={`${props.uuid}.visualization1`} unit={state.unit} quantity={state.count} />
-        <button
-          onClick={() => actions.decrement()}
-        >
+        <LiquidVisualization
+          uuid={`${props.uuid}.visualization1`}
+          unit={state.unit}
+          quantity={state.count}
+        />
+        <button onClick={() => actions.decrement()}>
           Remove 1 {state.unit}
         </button>
-        <button
-          onClick={() => actions.increment()}
-        >
-          Add 1 {state.unit}
-        </button>
-        <button
-          onClick={() => actions.setUnit('liter')}
-        >
-          Use Metric
-        </button>
-        <button
-          onClick={() => actions.setUnit('gallon')}
-        >
-          Use Imperial
-        </button>
+        <button onClick={() => actions.increment()}>Add 1 {state.unit}</button>
+        <button onClick={() => actions.setUnit('liter')}>Use Metric</button>
+        <button onClick={() => actions.setUnit('gallon')}>Use Imperial</button>
         <p>If there was twice as much:</p>
-        <LiquidVisualization uuid={`${props.uuid}.visualization2`} unit={state.unit} quantity={2 * state.count} />
+        <LiquidVisualization
+          uuid={`${props.uuid}.visualization2`}
+          unit={state.unit}
+          quantity={2 * state.count}
+        />
       </div>
     )
   })

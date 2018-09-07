@@ -22,8 +22,14 @@ export const HelloApp = component('HelloApp')
     <div>
       <label>Enter your name:</label>
       <p>
-        <input type='text' onChange={event => actions.setName(event.target.value)} value={state.name} />
+        <input
+          type="text"
+          onChange={event => actions.setName(event.target.value)}
+          value={state.name}
+        />
       </p>
-      <p>Hello, {state.name} from planet {props.planet}!</p>
+      <p>
+        Hello, {state.name} from planet {props.planet}!
+      </p>
     </div>
   ))

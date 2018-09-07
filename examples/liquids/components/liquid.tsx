@@ -2,8 +2,7 @@ import * as React from 'react'
 import { component } from '../../../src'
 import { LiquidUnitPlural, TLiquidUnit } from '../units/liquid'
 
-interface IProps {
-}
+interface IProps {}
 
 export const Liquid = component('Liquid')
   .props<{
@@ -11,11 +10,9 @@ export const Liquid = component('Liquid')
     unit: TLiquidUnit
   }>()
 
-  .render(
-    props => (
-      <p>
-        Current amount of liquid:
-        {' '}{props.quantity.toFixed(1)} {LiquidUnitPlural[props.unit]}.
-      </p>
-    )
-  )
+  .render(props => (
+    <p>
+      Current amount of liquid: {props.quantity.toFixed(1)}{' '}
+      {LiquidUnitPlural[props.unit]}.
+    </p>
+  ))

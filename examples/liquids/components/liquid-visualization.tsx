@@ -28,11 +28,14 @@ const renderBuckets = (quantity: number, unit: TLiquidUnit) => {
   const unitQuantity = Math.floor(quantity)
   for (let i = 0; i < unitQuantity; i++) {
     buckets.push(
-      <div key={i} style={{
-        ...bucketStyle,
-        ...bucketColor,
-        height: '26px'
-      }}>
+      <div
+        key={i}
+        style={{
+          ...bucketStyle,
+          ...bucketColor,
+          height: '26px'
+        }}
+      >
         1{LiquidUnitAbbreviation[unit]}
       </div>
     )
@@ -42,14 +45,19 @@ const renderBuckets = (quantity: number, unit: TLiquidUnit) => {
 
   if (remainder > 0) {
     buckets.push(
-      <div key={'remainder'} style={{
-        ...bucketStyle,
-        height: '26px'
-      }}>
-        <div style={{
-          ...bucketColor,
-          height: `${remainder * 26}px`
-        }} />
+      <div
+        key={'remainder'}
+        style={{
+          ...bucketStyle,
+          height: '26px'
+        }}
+      >
+        <div
+          style={{
+            ...bucketColor,
+            height: `${remainder * 26}px`
+          }}
+        />
       </div>
     )
   }
@@ -84,10 +92,13 @@ export const LiquidVisualization = component('LiquidVisualization')
   .render((props, state, actions) => {
     if (props.quantity !== state._.currentQuantity) {
       const diffQuantity = props.quantity - state._.currentQuantity
-      const nextQuantity = Math.abs(diffQuantity) < 0.05 ?
-        props.quantity :
-        state._.currentQuantity + diffQuantity / 3
-      requestSafeAction(props.uuid, () => actions.setCurrentQuantity(nextQuantity))
+      const nextQuantity =
+        Math.abs(diffQuantity) < 0.05
+          ? props.quantity
+          : state._.currentQuantity + diffQuantity / 3
+      requestSafeAction(props.uuid, () =>
+        actions.setCurrentQuantity(nextQuantity)
+      )
     }
 
     return (

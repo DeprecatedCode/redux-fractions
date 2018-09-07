@@ -1,6 +1,12 @@
-import { ReactNode } from 'react'
-import { Component, connect } from 'react-redux'
-import { IFluxStandardAction } from './flux'
+import { StatelessComponent, ReactNode } from 'react'
+import { connect } from 'react-redux'
+
+export interface IFluxStandardAction<TPayload = void> {
+  error?: boolean
+  meta?: object
+  payload?: TPayload
+  type: string
+}
 
 interface IReducers {
   [key: string]: (state: object, payload?: any, error?: boolean) => object
@@ -26,30 +32,24 @@ const persist = (newRootState: IStateType) => {
   }
 
   try {
-    Object.keys(newRootState)
-      .forEach(key => {
-        const filteredState: { [key: string]: any } = {}
-        let include = false
-        Object.keys(newRootState[key])
-          .forEach(subKey => {
-            if (subKey !== TEMPORARY_STATE_KEY) {
-              filteredState[subKey] = newRootState[key][subKey]
-              include = true
-            }
-          })
-
-        if (include) {
-          lastPersistedState[key] = filteredState
-        }
-
-        else if (key in lastPersistedState) {
-          delete lastPersistedState[key]
+    Object.keys(newRootState).forEach(key => {
+      const filteredState: { [key: string]: any } = {}
+      let include = false
+      Object.keys(newRootState[key]).forEach(subKey => {
+        if (subKey !== TEMPORARY_STATE_KEY) {
+          filteredState[subKey] = newRootState[key][subKey]
+          include = true
         }
       })
-    localStorage.setItem(persistKey, JSON.stringify(lastPersistedState))
-  }
 
-  catch (e) {
+      if (include) {
+        lastPersistedState[key] = filteredState
+      } else if (key in lastPersistedState) {
+        delete lastPersistedState[key]
+      }
+    })
+    localStorage.setItem(persistKey, JSON.stringify(lastPersistedState))
+  } catch (e) {
     window.console.error(e)
     window.console.warn('fractionPersist: unable to persist state')
   }
@@ -72,14 +72,13 @@ export const fractionPersist = (storageKey: string) => {
 
     const data = JSON.parse(storage) as { [key: string]: any }
 
-    Object.keys(data)
-      .forEach(key => {
-        initialRootStates[key] = data[key]
-        lastPersistedState[key] = data[key]
-      })
+    Object.keys(data).forEach(key => {
+      initialRootStates[key] = data[key]
+      lastPersistedState[key] = data[key]
+    })
+  } catch (e) {
+    return
   }
-
-  catch (e) { return }
 }
 
 /**
@@ -103,20 +102,20 @@ export const fractionReducer = (
 
   if (typeof action.payload === 'undefined') {
     window.console.debug(`✳️ <${namespace} uuid='${atob(uuid)}'>.${type}()`)
-  }
-
-  else {
-    window.console.debug(`✳️ <${namespace} uuid='${atob(uuid)}'>.${type}(`, action.payload, ')')
-  }
-
-  const state = typeof rootState === 'object' &&
-    stateKey in rootState ?
-    rootState[stateKey] :
-    (
-      stateKey in initialRootStates ?
-        { ...initialRootStates[namespace], ...initialRootStates[stateKey] } :
-        initialRootStates[namespace]
+  } else {
+    window.console.debug(
+      `✳️ <${namespace} uuid='${atob(uuid)}'>.${type}(`,
+      action.payload,
+      ')'
     )
+  }
+
+  const state =
+    typeof rootState === 'object' && stateKey in rootState
+      ? rootState[stateKey]
+      : stateKey in initialRootStates
+        ? { ...initialRootStates[namespace], ...initialRootStates[stateKey] }
+        : initialRootStates[namespace]
 
   const newRootState = {
     ...rootState,
@@ -128,15 +127,12 @@ export const fractionReducer = (
 
   if (typeof persistKey === 'string') {
     if (typeof persistState === 'undefined') {
-      setTimeout(
-        () => {
-          if (typeof persistState !== 'undefined') {
-            persist(persistState)
-            persistState = undefined
-          }
-        },
-        PERSIST_TIMEOUT
-      )
+      setTimeout(() => {
+        if (typeof persistState !== 'undefined') {
+          persist(persistState)
+          persistState = undefined
+        }
+      }, PERSIST_TIMEOUT)
     }
 
     persistState = newRootState
@@ -153,23 +149,27 @@ interface IProps {
   [K: string]: any
 }
 
-interface IUUIDProp { uuid: string | number }
+interface IUUIDProp {
+  uuid: string | number
+}
 
 type TActionsImplementation<TState, TActions extends IActions> = {
-  [K in keyof TActions]: TActions[K] extends void ?
-  (state: TState) => Partial<TState> :
-  (payload: TActions[K], state: TState) => Partial<TState>
+  [K in keyof TActions]: TActions[K] extends void
+    ? (state: TState) => Partial<TState>
+    : (payload: TActions[K], state: TState) => Partial<TState>
 }
 
 type TActionsDispatch<TActions extends IActions> = {
-  [K in keyof TActions]: TActions[K] extends void ?
-  () => void :
-  (payload: TActions[K]) => void
+  [K in keyof TActions]: TActions[K] extends void
+    ? () => void
+    : (payload: TActions[K]) => void
 }
 
 interface IInitialComponent {
   props<TProps extends IProps>(): IComponentWithProps<TProps>
-  render(renderer: (children?: ReactNode) => JSX.Element | null): Component<{}>
+  render(
+    renderer: (children?: ReactNode) => JSX.Element | null
+  ): StatelessComponent<{}>
   state<TState>(initialState: TState): IComponentWithState<TState>
 }
 
@@ -181,12 +181,18 @@ interface IComponentWithState<TState> {
 
 interface IComponentWithStateActions<TState, TActions extends IActions> {
   render(
-    renderer: (state: TState, actions: TActionsDispatch<TActions>, children?: ReactNode) => JSX.Element | null
-  ): Component<IUUIDProp>
+    renderer: (
+      state: TState,
+      actions: TActionsDispatch<TActions>,
+      children?: ReactNode
+    ) => JSX.Element | null
+  ): StatelessComponent<IUUIDProp>
 }
 
 interface IComponentWithProps<TProps> {
-  render(renderer: (props: TProps, children?: ReactNode) => JSX.Element | null): Component<TProps>
+  render(
+    renderer: (props: TProps, children?: ReactNode) => JSX.Element | null
+  ): StatelessComponent<TProps>
   state<TState>(initialState: TState): IComponentWithPropsState<TProps, TState>
 }
 
@@ -196,7 +202,11 @@ interface IComponentWithPropsState<TProps, TState> {
   ): IComponentWithPropsStateActions<TProps, TState, TActions>
 }
 
-interface IComponentWithPropsStateActions<TProps extends IProps, TState, TActions extends IActions> {
+interface IComponentWithPropsStateActions<
+  TProps extends IProps,
+  TState,
+  TActions extends IActions
+> {
   render(
     renderer: (
       props: TProps & IUUIDProp,
@@ -204,57 +214,61 @@ interface IComponentWithPropsStateActions<TProps extends IProps, TState, TAction
       actions: TActionsDispatch<TActions>,
       children?: ReactNode
     ) => JSX.Element | null
-  ): Component<TProps & IUUIDProp>
+  ): StatelessComponent<TProps & IUUIDProp>
 }
 
-const getMapStateToProps = <IState>(name: string) =>
-  (state: IState, ownProps: IUUIDProp) => {
-    const stateKey = `${name}.${'uuid' in ownProps ? btoa(String(ownProps.uuid)) : 'all'}`
-    return ({
-      state: stateKey in state ?
-        (state as any)[stateKey] :
-        (
-          stateKey in initialRootStates ?
-            { ...initialRootStates[name], ...initialRootStates[stateKey] } :
-            initialRootStates[name]
-        )
-    })
+const getMapStateToProps = <IState>(name: string) => (
+  state: IState,
+  ownProps: IUUIDProp
+) => {
+  const stateKey = `${name}.${
+    'uuid' in ownProps ? btoa(String(ownProps.uuid)) : 'all'
+  }`
+  return {
+    state:
+      stateKey in state
+        ? (state as any)[stateKey]
+        : stateKey in initialRootStates
+          ? { ...initialRootStates[name], ...initialRootStates[stateKey] }
+          : initialRootStates[name]
   }
+}
 
-const getMapDispatchToProps = <
-  TState, TActions extends IActions
-  >(name: string, componentActions: TActionsImplementation<TState, TActions>) =>
-  (dispatch: any, ownProps: IUUIDProp) => {
-    const actionCreators: any = {}
+const getMapDispatchToProps = <TState, TActions extends IActions>(
+  name: string,
+  componentActions: TActionsImplementation<TState, TActions>
+) => (dispatch: any, ownProps: IUUIDProp) => {
+  const actionCreators: any = {}
 
-    Object.keys(componentActions)
-      .forEach(key => {
-        const stateKey = `${name}.${'uuid' in ownProps ? btoa(String(ownProps.uuid)) : 'all'}`
+  Object.keys(componentActions).forEach(key => {
+    const stateKey = `${name}.${
+      'uuid' in ownProps ? btoa(String(ownProps.uuid)) : 'all'
+    }`
 
-        actionCreators[key] = (payload: any, error: boolean = false) => {
-          const action: IFluxStandardAction = {
-            error,
-            payload,
-            type: `${stateKey}:${key}`
-          }
+    actionCreators[key] = (payload: any, error: boolean = false) => {
+      const action: IFluxStandardAction = {
+        error,
+        payload,
+        type: `${stateKey}:${key}`
+      }
 
-          dispatch(action)
-        }
+      dispatch(action)
+    }
 
-        const actionKey = `${name}:${key}`
-        if (!(actionKey in reducers)) {
-          reducers[actionKey] = (state, payload, error) => {
-            const reducer = componentActions[key] as any
+    const actionKey = `${name}:${key}`
+    if (!(actionKey in reducers)) {
+      reducers[actionKey] = (state, payload, error) => {
+        const reducer = componentActions[key] as any
 
-            return typeof payload === 'undefined' ?
-              reducer(state, error) :
-              reducer(payload, state, error)
-          }
-        }
-      })
+        return typeof payload === 'undefined'
+          ? reducer(state, error)
+          : reducer(payload, state, error)
+      }
+    }
+  })
 
-    return { actions: actionCreators as TActionsDispatch<TActions> }
-  }
+  return { actions: actionCreators as TActionsDispatch<TActions> }
+}
 
 /**
  * @author Nate Ferrero
@@ -268,7 +282,9 @@ export const component = (name: string): IInitialComponent => ({
         initialRootStates[name] = initialState as any
 
         return {
-          actions<TActions>(componentActions: TActionsImplementation<TState, TActions>) {
+          actions<TActions>(
+            componentActions: TActionsImplementation<TState, TActions>
+          ) {
             return {
               render(renderer: any) {
                 return connect<
@@ -276,21 +292,25 @@ export const component = (name: string): IInitialComponent => ({
                   { actions: TActionsDispatch<TActions> },
                   TProps & IUUIDProp,
                   TState
-                  >(
-                    getMapStateToProps<TState>(name),
-                    getMapDispatchToProps<TState, TActions>(name, componentActions),
-                    undefined,
-                    { getDisplayName: () => `Fraction:${name}` }
-                  )(
-                    ({ state, actions, children, ...props }) => renderer(props, state, actions, children)
-                  ) as any
+                >(
+                  getMapStateToProps<TState>(name),
+                  getMapDispatchToProps<TState, TActions>(
+                    name,
+                    componentActions
+                  ),
+                  undefined,
+                  { getDisplayName: () => `Fraction:${name}` }
+                )(({ state, actions, children, ...props }) =>
+                  renderer(props, state, actions, children)
+                ) as any
               }
             }
           }
         }
       },
       render(renderer) {
-        return ({ children, ...props }: { children?: ReactNode }) => renderer(props as any, children)
+        return ({ children, ...props }: { children?: ReactNode }) =>
+          renderer(props as any, children)
       }
     }
   },
@@ -298,22 +318,30 @@ export const component = (name: string): IInitialComponent => ({
     initialRootStates[name] = initialState as any
 
     return {
-      actions<TActions extends IActions>(componentActions: TActionsImplementation<TState, TActions>) {
+      actions<TActions extends IActions>(
+        componentActions: TActionsImplementation<TState, TActions>
+      ) {
         return {
-          render(renderer: (state: TState, actions: TActions, children: ReactNode) => JSX.Element | null) {
+          render(
+            renderer: (
+              state: TState,
+              actions: TActions,
+              children: ReactNode
+            ) => JSX.Element | null
+          ) {
             return connect<
               { state: TState },
               { actions: TActionsDispatch<TActions> },
               IUUIDProp,
               TState
-              >(
-                getMapStateToProps<TState>(name),
-                getMapDispatchToProps<TState, TActions>(name, componentActions),
-                undefined,
-                { getDisplayName: () => `Fraction:${name}` }
-              )(
-                ({ state, actions, children }) => renderer(state, actions, children)
-              )
+            >(
+              getMapStateToProps<TState>(name),
+              getMapDispatchToProps<TState, TActions>(name, componentActions),
+              undefined,
+              { getDisplayName: () => `Fraction:${name}` }
+            )(({ state, actions, children }) =>
+              renderer(state, actions, children)
+            ) as any
           }
         }
       }
@@ -327,7 +355,10 @@ export const component = (name: string): IInitialComponent => ({
 const SAFE_ACTION_TIMEOUT = 15
 const safeActionTimers: { [key: string]: number } = {}
 
-export const requestSafeAction = (uuid: string | number, action: () => void) => {
+export const requestSafeAction = (
+  uuid: string | number,
+  action: () => void
+) => {
   clearTimeout(safeActionTimers[String(uuid)])
   safeActionTimers[String(uuid)] = setTimeout(action, SAFE_ACTION_TIMEOUT)
 }

@@ -14,7 +14,7 @@ fractionPersist('hello-world-app')
 
 render(
   <Provider store={appStore}>
-    <HelloApp uuid='app' planet='Earth' />
+    <HelloApp uuid="app" planet="Earth" />
   </Provider>,
   appContainer
 )
