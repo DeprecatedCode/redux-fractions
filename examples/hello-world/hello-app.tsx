@@ -13,8 +13,10 @@ export const HelloApp = component('HelloApp')
   })
 
   .actions<{
+    reset: void
     setName: string
   }>({
+    reset: () => ({ name: 'human' }),
     setName: name => ({ name })
   })
 
@@ -23,10 +25,11 @@ export const HelloApp = component('HelloApp')
       <label>Enter your name:</label>
       <p>
         <input
-          type='text'
+          type="text"
           onChange={event => actions.setName(event.target.value)}
           value={state.name}
         />
+        <button onClick={actions.reset}>Reset</button>
       </p>
       <p>
         Hello, {state.name} from planet {props.planet}!

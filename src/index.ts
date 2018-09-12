@@ -1,5 +1,7 @@
-import { StatelessComponent, ReactNode } from 'react'
+import { ReactNode, StatelessComponent } from 'react' // tslint:disable-line:no-implicit-dependencies
 import { connect } from 'react-redux'
+
+const { setTimeout } = window
 
 export interface IFluxStandardAction<TPayload = void> {
   error?: boolean
@@ -45,7 +47,7 @@ const persist = (newRootState: IStateType) => {
       if (include) {
         lastPersistedState[key] = filteredState
       } else if (key in lastPersistedState) {
-        delete lastPersistedState[key]
+        delete lastPersistedState[key] // tslint:disable-line:no-dynamic-delete
       }
     })
     localStorage.setItem(persistKey, JSON.stringify(lastPersistedState))
@@ -155,8 +157,10 @@ interface IUUIDProp {
 
 type TActionsImplementation<TState, TActions extends IActions> = {
   [K in keyof TActions]: TActions[K] extends void
-    ? (state: TState) => Partial<TState>
-    : (payload: TActions[K], state: TState) => Partial<TState>
+    ? () => Partial<TState> | ((state: TState) => Partial<TState>)
+    : (
+        payload: TActions[K]
+      ) => Partial<TState> | ((state: TState) => Partial<TState>)
 }
 
 type TActionsDispatch<TActions extends IActions> = {
@@ -224,6 +228,7 @@ const getMapStateToProps = <IState>(name: string) => (
   const stateKey = `${name}.${
     'uuid' in ownProps ? btoa(String(ownProps.uuid)) : 'all'
   }`
+
   return {
     state:
       stateKey in state
@@ -259,10 +264,12 @@ const getMapDispatchToProps = <TState, TActions extends IActions>(
     if (!(actionKey in reducers)) {
       reducers[actionKey] = (state, payload, error) => {
         const reducer = componentActions[key] as any
+        const result = reducer(payload)
+        if (typeof result === 'function') {
+          return result(state, error)
+        }
 
-        return typeof payload === 'undefined'
-          ? reducer(state, error)
-          : reducer(payload, state, error)
+        return result
       }
     }
   })
@@ -359,6 +366,6 @@ export const requestSafeAction = (
   uuid: string | number,
   action: () => void
 ) => {
-  clearTimeout(safeActionTimers[String(uuid)])
-  safeActionTimers[String(uuid)] = setTimeout(action, SAFE_ACTION_TIMEOUT)
+  clearTimeout(safeActionTimers[`${uuid}`])
+  safeActionTimers[`${uuid}`] = setTimeout(action, SAFE_ACTION_TIMEOUT)
 }

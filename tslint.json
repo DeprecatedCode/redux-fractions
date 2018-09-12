@@ -4,6 +4,7 @@
     "tslint:all"
   ],
   "rules": {
+    "align": false,
     "arrow-parens": {
       "options": "ban-single-arg-parens"
     },
@@ -31,7 +32,8 @@
     "quotemark": {
       "options": [
         "single",
-        "avoid-template"
+        "avoid-template",
+        "jsx-double"
       ]
     },
     "semicolon": {
@@ -55,6 +57,7 @@
     "file-name-casing": false,
     "linebreak-style": {
       "options": "LF"
-    }
+    },
+    "newline-per-chained-call": false
   }
 }

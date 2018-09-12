@@ -14,7 +14,7 @@ fractionPersist('math-app')
 
 render(
   <Provider store={appStore}>
-    <App uuid='app' />
+    <App uuid="app" />
   </Provider>,
   appContainer
 )

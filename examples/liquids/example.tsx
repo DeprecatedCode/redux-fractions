@@ -14,7 +14,7 @@ fractionPersist('example-app')
 
 render(
   <Provider store={appStore}>
-    <App itemName='wine' uuid='app' />
+    <App itemName="wine" uuid="app" />
   </Provider>,
   appContainer
 )

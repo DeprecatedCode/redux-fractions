@@ -26,9 +26,9 @@ export const App = component('App')
     increment: void
     setUnit: TLiquidUnit
   }>({
-    decrement: state => ({ count: Math.max(0, state.count - 1) }),
-    increment: state => ({ count: state.count + 1 }),
-    setUnit: (unit, state) => ({
+    decrement: () => state => ({ count: Math.max(0, state.count - 1) }),
+    increment: () => state => ({ count: state.count + 1 }),
+    setUnit: unit => state => ({
       count: convertLiquidQuantity(state.count, state.unit, unit),
       unit
     })
@@ -43,9 +43,7 @@ export const App = component('App')
         unit={state.unit}
         quantity={state.count}
       />
-      <button onClick={() => actions.decrement()}>
-        Remove 1 {state.unit}
-      </button>
+      <button onClick={() => actions.decrement()}>Remove 1 {state.unit}</button>
       <button onClick={() => actions.increment()}>Add 1 {state.unit}</button>
       <button onClick={() => actions.setUnit('liter')}>Use Metric</button>
       <button onClick={() => actions.setUnit('gallon')}>Use Imperial</button>
@@ -56,5 +54,4 @@ export const App = component('App')
         quantity={state.count * relativeQuantity}
       />
     </div>
-  )
-  )
+  ))

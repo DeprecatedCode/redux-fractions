@@ -7,9 +7,9 @@ const buttonStyle = (selected: boolean) => ({
   margin: '2px',
   ...(selected
     ? {
-      backgroundColor: 'blue',
-      color: 'white'
-    }
+        backgroundColor: 'blue',
+        color: 'white'
+      }
     : {})
 })
 
@@ -54,7 +54,7 @@ export const App = component('App')
   .render(({ x, y, _: { operand } }, actions) => (
     <div>
       <input
-        type='number'
+        type="number"
         onChange={event => actions.setX(event.target.valueAsNumber)}
         value={x}
       />
@@ -87,7 +87,7 @@ export const App = component('App')
         ÷
       </button>
       <input
-        type='number'
+        type="number"
         onChange={event => actions.setY(event.target.valueAsNumber)}
         value={y}
       />{' '}
