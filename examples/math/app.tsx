@@ -1,4 +1,4 @@
-import * as React from 'react'
+import * as React from 'react' // tslint:disable-line:no-implicit-dependencies
 import { component } from '../../src'
 
 const buttonStyle = (selected: boolean) => ({
@@ -7,9 +7,9 @@ const buttonStyle = (selected: boolean) => ({
   margin: '2px',
   ...(selected
     ? {
-        backgroundColor: 'blue',
-        color: 'white'
-      }
+      backgroundColor: 'blue',
+      color: 'white'
+    }
     : {})
 })
 
@@ -43,18 +43,18 @@ export const App = component('App')
     y: 0
   })
   .actions<{
+    setOperand: string
     setX: number
     setY: number
-    setOperand: string
   }>({
+    setOperand: operand => ({ _: { operand } }),
     setX: x => ({ x: isNaN(x) ? 0 : x }),
-    setY: y => ({ y: isNaN(y) ? 0 : y }),
-    setOperand: operand => ({ _: { operand } })
+    setY: y => ({ y: isNaN(y) ? 0 : y })
   })
   .render(({ x, y, _: { operand } }, actions) => (
     <div>
       <input
-        type="number"
+        type='number'
         onChange={event => actions.setX(event.target.valueAsNumber)}
         value={x}
       />
@@ -87,7 +87,7 @@ export const App = component('App')
         ÷
       </button>
       <input
-        type="number"
+        type='number'
         onChange={event => actions.setY(event.target.valueAsNumber)}
         value={y}
       />{' '}

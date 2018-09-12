@@ -1,26 +1,26 @@
-import * as React from 'react'
+import * as React from 'react' // tslint:disable-line:no-implicit-dependencies
 import { component, requestSafeAction } from '../../../src'
-import { TLiquidUnit, LiquidUnitAbbreviation } from '../units/liquid'
+import { LiquidUnitAbbreviation, TLiquidUnit } from '../units/liquid'
 
 const bucketStyle = {
-  verticalAlign: 'bottom',
-  display: 'inline-block',
   boxSizing: 'border-box' as any,
-  width: '18px',
-  marginRight: '4px',
-  marginBottom: '4px',
   color: '#ace',
-  fontSize: '12px',
+  display: 'inline-block',
   fontFamily: 'Georgia',
+  fontSize: '12px',
   fontStyle: 'italic',
+  lineHeight: '30px',
+  marginBottom: '4px',
+  marginRight: '4px',
   textAlign: 'center' as any,
-  lineHeight: '30px'
+  verticalAlign: 'bottom',
+  width: '18px'
 }
 
 const bucketColor = {
-  boxSizing: 'border-box' as any,
+  background: '#def',
   border: '1px solid #ace',
-  background: '#def'
+  boxSizing: 'border-box' as any
 }
 
 const renderBuckets = (quantity: number, unit: TLiquidUnit) => {
@@ -42,6 +42,7 @@ const renderBuckets = (quantity: number, unit: TLiquidUnit) => {
   }
 
   const remainder = quantity - unitQuantity
+  const bucketHeight = 26
 
   if (remainder > 0) {
     buckets.push(
@@ -49,13 +50,13 @@ const renderBuckets = (quantity: number, unit: TLiquidUnit) => {
         key={'remainder'}
         style={{
           ...bucketStyle,
-          height: '26px'
+          height: `${bucketHeight}px`
         }}
       >
         <div
           style={{
             ...bucketColor,
-            height: `${remainder * 26}px`
+            height: `${remainder * bucketHeight}px`
           }}
         />
       </div>
@@ -64,6 +65,9 @@ const renderBuckets = (quantity: number, unit: TLiquidUnit) => {
 
   return buckets
 }
+
+const diffThreshold = 0.05
+const diffSpeed = 3
 
 export const LiquidVisualization = component('LiquidVisualization')
   .props<{
@@ -93,9 +97,9 @@ export const LiquidVisualization = component('LiquidVisualization')
     if (props.quantity !== state._.currentQuantity) {
       const diffQuantity = props.quantity - state._.currentQuantity
       const nextQuantity =
-        Math.abs(diffQuantity) < 0.05
+        Math.abs(diffQuantity) < diffThreshold
           ? props.quantity
-          : state._.currentQuantity + diffQuantity / 3
+          : state._.currentQuantity + diffQuantity / diffSpeed
       requestSafeAction(props.uuid, () =>
         actions.setCurrentQuantity(nextQuantity)
       )

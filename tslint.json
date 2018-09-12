@@ -40,12 +40,10 @@
       ]
     },
     "trailing-comma": {
-      "options": [
-        {
-          "multiline": "never",
-          "singleline": "never"
-        }
-      ]
+      "options": [{
+        "multiline": "never",
+        "singleline": "never"
+      }]
     },
     "type-literal-delimiter": false,
     "typedef": false,
@@ -53,6 +51,10 @@
       "options": [
         "allow-pascal-case"
       ]
+    },
+    "file-name-casing": false,
+    "linebreak-style": {
+      "options": "LF"
     }
   }
 }

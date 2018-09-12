@@ -1,4 +1,4 @@
-import * as React from 'react'
+import * as React from 'react' // tslint:disable-line:no-implicit-dependencies
 import { component } from '../../src'
 
 export const HelloApp = component('HelloApp')
@@ -23,7 +23,7 @@ export const HelloApp = component('HelloApp')
       <label>Enter your name:</label>
       <p>
         <input
-          type="text"
+          type='text'
           onChange={event => actions.setName(event.target.value)}
           value={state.name}
         />

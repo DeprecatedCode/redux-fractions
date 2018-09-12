@@ -1,9 +1,9 @@
-import * as React from 'react'
-import { render } from 'react-dom'
+import * as React from 'react' // tslint:disable-line:no-implicit-dependencies
+import { render } from 'react-dom' // tslint:disable-line:no-implicit-dependencies
 
 import { Provider } from 'react-redux'
-import { createStore } from 'redux'
-import { fractionReducer, fractionPersist } from '../../src'
+import { createStore } from 'redux' // tslint:disable-line:no-implicit-dependencies
+import { fractionPersist, fractionReducer } from '../../src'
 
 import { App } from './app'
 
@@ -14,7 +14,7 @@ fractionPersist('example-app')
 
 render(
   <Provider store={appStore}>
-    <App itemName="wine" uuid="app" />
+    <App itemName='wine' uuid='app' />
   </Provider>,
   appContainer
 )

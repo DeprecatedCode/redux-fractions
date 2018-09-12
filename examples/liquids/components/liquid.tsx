@@ -1,8 +1,6 @@
-import * as React from 'react'
+import * as React from 'react' // tslint:disable-line:no-implicit-dependencies
 import { component } from '../../../src'
 import { LiquidUnitPlural, TLiquidUnit } from '../units/liquid'
-
-interface IProps {}
 
 export const Liquid = component('Liquid')
   .props<{

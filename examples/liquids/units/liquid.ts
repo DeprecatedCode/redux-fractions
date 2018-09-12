@@ -19,6 +19,4 @@ export const convertLiquidQuantity = (
   q: number,
   from: TLiquidUnit,
   to: TLiquidUnit
-) => {
-  return (q * LiquidUnitRelativeMeasure[to]) / LiquidUnitRelativeMeasure[from]
-}
+) => q * LiquidUnitRelativeMeasure[to] / LiquidUnitRelativeMeasure[from]
